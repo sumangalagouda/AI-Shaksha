@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1772109237039,
+    "date": "26 February 2026",
+    "department": "Traffic Police",
+    "official": "Unknown Traffic Officer",
+    "bribe_amount": "₹1000",
+    "bribe_amount_value": 1000,
+    "location": "Not Specified",
+    "violation": "Prevention of Corruption Act 1988, Section 7 — Public servant accepting bribe",
+    "authority": "Anti-Corruption Bureau (ACB)",
+    "risk_level": "HIGH",
+    "evidence_strength": "STRONG",
+    "transcript": "Rs 1000 drive Rs 1000 price",
+    "anonymous": true,
+    "created_at": "2026-02-26T18:03:57.040915"
+  }
+]

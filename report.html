@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Report a Bribe — SakshaAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #060608;
+      --surface: #0e0e14;
+      --surface2: #16161f;
+      --border: #1e1e2e;
+      --accent: #ff4d1c;
+      --accent2: #ff8c42;
+      --text: #f0eff4;
+      --muted: #6e6d7a;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 1000; opacity: 0.4;
+    }
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 20px 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(6,6,8,0.9); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem;
+      color: var(--text); text-decoration: none;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .logo-dot {
+      width: 8px; height: 8px; background: var(--accent);
+      border-radius: 50%; animation: blink 2s infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .nav-back { color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: color 0.3s; }
+    .nav-back:hover { color: var(--text); }
+
+    .page { max-width: 860px; margin: 0 auto; padding: 110px 40px 80px; }
+    .page-tag { font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+    .page-title { font-family: 'Syne', sans-serif; font-size: 2.8rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+    .page-sub { color: var(--muted); margin-top: 12px; font-size: 1rem; line-height: 1.6; margin-bottom: 40px; }
+
+    /* STEPS */
+    .steps-indicator { display: flex; align-items: center; margin-bottom: 36px; }
+    .step-ind { display: flex; align-items: center; gap: 10px; flex: 1; }
+    .step-ind-num {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700;
+      color: var(--muted); flex-shrink: 0; transition: all 0.3s;
+    }
+    .step-ind.active .step-ind-num { border-color: var(--accent); background: var(--accent); color: white; }
+    .step-ind.done .step-ind-num { border-color: var(--success); background: var(--success); color: white; }
+    .step-ind-label { font-size: 0.8rem; color: var(--muted); transition: color 0.3s; }
+    .step-ind.active .step-ind-label { color: var(--text); }
+    .step-ind.done .step-ind-label { color: var(--success); }
+    .step-line { flex: 1; height: 1px; background: var(--border); margin: 0 8px; max-width: 50px; }
+
+    /* API CONFIG */
+    .api-config {
+      background: rgba(255,77,28,0.04); border: 1px solid rgba(255,77,28,0.2);
+      border-radius: 12px; padding: 24px; margin-bottom: 28px;
+    }
+    .api-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .api-header h4 { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--accent2); }
+    .api-status { font-size: 0.75rem; padding: 4px 12px; border-radius: 100px; }
+    .api-status.ok { background: rgba(34,197,94,0.1); color: var(--success); border: 1px solid rgba(34,197,94,0.3); }
+    .api-status.no { background: rgba(245,158,11,0.1); color: var(--warning); border: 1px solid rgba(245,158,11,0.3); }
+    .api-row { display: flex; gap: 10px; }
+    .api-inp {
+      flex: 1; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 11px 16px; border-radius: 8px;
+      font-family: 'Courier New', monospace; font-size: 0.85rem; outline: none; transition: border-color 0.3s;
+    }
+    .api-inp:focus { border-color: var(--accent); }
+    .api-btn {
+      background: var(--accent); color: white; border: none;
+      padding: 11px 20px; border-radius: 8px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+      cursor: pointer; transition: background 0.3s; white-space: nowrap;
+    }
+    .api-btn:hover { background: var(--accent2); }
+    .api-hint { font-size: 0.75rem; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+    .api-hint a { color: var(--accent2); text-decoration: none; }
+    .api-hint a:hover { text-decoration: underline; }
+
+    /* CARDS */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 32px; margin-bottom: 20px; transition: border-color 0.3s;
+    }
+    .card.lit { border-color: rgba(255,77,28,0.3); }
+    .card-title {
+      font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+      margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+    }
+    .cnum {
+      background: rgba(255,77,28,0.1); color: var(--accent);
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; flex-shrink: 0;
+    }
+
+    /* FORM */
+    .cfg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .fgroup { display: flex; flex-direction: column; gap: 8px; }
+    label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    select {
+      background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      padding: 12px 16px; border-radius: 8px; font-size: 0.95rem;
+      font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.3s;
+      appearance: none; cursor: pointer;
+    }
+    select:focus { border-color: var(--accent); }
+    .anon-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px; background: var(--surface2);
+      border-radius: 8px; border: 1px solid var(--border);
+      cursor: pointer; grid-column: span 2; transition: border-color 0.3s;
+    }
+    .anon-row:hover { border-color: var(--muted); }
+    .tswitch {
+      width: 42px; height: 22px; background: var(--success);
+      border-radius: 11px; position: relative; flex-shrink: 0; transition: background 0.3s;
+    }
+    .tswitch::after {
+      content: ''; position: absolute;
+      width: 16px; height: 16px; background: white;
+      border-radius: 50%; top: 3px; left: 3px; transition: transform 0.3s;
+    }
+    .tswitch.off { background: var(--border); }
+    .tswitch.off::after { transform: translateX(20px); }
+
+    /* DEMO BANNER */
+    .demo-banner {
+      background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; color: var(--warning);
+      margin-bottom: 20px; display: flex; align-items: flex-start; gap: 8px;
+    }
+
+    /* RECORD */
+    .rec-center { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 8px 0 16px; }
+    .rec-wrap { position: relative; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; }
+    .rec-pulse { position: absolute; inset: -15px; border-radius: 50%; border: 2px solid var(--accent); opacity: 0; }
+    .rec-wrap.go .rec-pulse { animation: rpulse 1.5s infinite; }
+    @keyframes rpulse { 0%{transform:scale(0.85);opacity:0.8} 100%{transform:scale(1.5);opacity:0} }
+    .rec-btn {
+      width: 100px; height: 100px; border-radius: 50%;
+      border: 2px solid var(--accent); background: rgba(255,77,28,0.08);
+      cursor: pointer; font-size: 2.2rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s; position: relative; z-index: 1;
+    }
+    .rec-btn:hover { background: rgba(255,77,28,0.18); transform: scale(1.05); }
+    .rec-btn.go { background: var(--danger); border-color: var(--danger); animation: rbtnpulse 1s infinite; }
+    @keyframes rbtnpulse { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.5)} 50%{box-shadow:0 0 0 16px rgba(239,68,68,0)} }
+    .timer { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--text); letter-spacing: 0.05em; }
+    .timer.go { color: var(--danger); }
+    .waveform { display: flex; align-items: center; gap: 3px; height: 48px; }
+    .wb { width: 3px; background: rgba(255,77,28,0.4); border-radius: 2px; height: 6px; }
+    .waveform.go .wb { animation: wbounce 0.8s infinite ease-in-out; }
+    .wb:nth-child(2n){animation-delay:0.15s!important}
+    .wb:nth-child(3n){animation-delay:0.3s!important}
+    .wb:nth-child(4n){animation-delay:0.45s!important}
+    @keyframes wbounce { 0%,100%{height:6px;opacity:0.4} 50%{height:36px;opacity:1} }
+    .rec-status { font-size: 0.88rem; color: var(--muted); text-align: center; line-height: 1.5; }
+    .live-badge {
+      background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2);
+      border-radius: 8px; padding: 10px 16px; font-size: 0.82rem; color: var(--success);
+      display: flex; align-items: center; gap: 8px; margin-top: 8px;
+    }
+    .live-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: blink 1s infinite; flex-shrink: 0; }
+
+    /* TRANSCRIPT */
+    .tbox {
+      width: 100%; min-height: 130px; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;
+      color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
+      line-height: 1.7; resize: vertical; outline: none; transition: border-color 0.3s; margin-top: 20px;
+    }
+    .tbox:focus { border-color: var(--accent); }
+    .tactions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+
+    /* ANALYSIS */
+    .agrid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 14px; }
+    .aitem { background: var(--surface2); border-radius: 8px; padding: 14px; border-left: 3px solid var(--border); }
+    .aitem.hi { border-left-color: var(--accent); }
+    .alabel { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+    .aval { font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; color: var(--text); line-height: 1.3; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 0.72rem; font-weight: 500; }
+    .bd { background: rgba(239,68,68,0.12); color: #ef4444; }
+    .bw { background: rgba(245,158,11,0.12); color: #f59e0b; }
+    .bs { background: rgba(34,197,94,0.12); color: #22c55e; }
+    .sumbox { background: var(--surface2); border-left: 3px solid var(--warning); border-radius: 8px; padding: 14px 16px; font-size: 0.88rem; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+    .authbox {
+      background: rgba(255,77,28,0.04); border: 1px solid rgba(255,77,28,0.2);
+      border-radius: 8px; padding: 18px 20px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .authlabel { font-size: 0.75rem; color: var(--muted); margin-bottom: 4px; }
+    .authname { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 800; color: var(--accent); }
+
+    /* COMPLAINT */
+    .cbox {
+      width: 100%; min-height: 280px; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 8px; padding: 18px;
+      color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; line-height: 1.8; resize: vertical; outline: none;
+    }
+    .guide { background: var(--surface2); border-radius: 8px; padding: 18px; margin-top: 16px; }
+    .guide h4 { font-family: 'Syne', sans-serif; font-size: 0.88rem; font-weight: 700; margin-bottom: 10px; }
+    .guide p { font-size: 0.82rem; color: var(--muted); line-height: 1.8; }
+
+    /* BUTTONS */
+    .btn {
+      padding: 11px 22px; border-radius: 8px; font-size: 0.9rem; font-weight: 500;
+      cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 7px;
+      font-family: 'DM Sans', sans-serif; transition: all 0.3s; text-decoration: none;
+    }
+    .btn-p { background: var(--accent); color: white; }
+    .btn-p:hover { background: var(--accent2); transform: translateY(-1px); }
+    .btn-p:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; transform: none; }
+    .btn-o { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-o:hover { border-color: var(--muted); background: var(--surface2); }
+    .btn-s { background: var(--success); color: white; }
+    .btn-s:hover { filter: brightness(1.1); }
+    .btn-full { width: 100%; justify-content: center; padding: 15px; font-size: 1rem; margin-top: 20px; }
+
+    /* LOADER */
+    .loader { text-align: center; padding: 50px 20px; }
+    .loader-icon { font-size: 2.2rem; margin-bottom: 14px; display: block; animation: lspin 2s ease-in-out infinite; }
+    @keyframes lspin { 0%,100%{transform:rotate(-10deg)} 50%{transform:rotate(10deg)} }
+    .dots { display: inline-flex; gap: 4px; margin-top: 8px; }
+    .dots span { width: 5px; height: 5px; background: var(--muted); border-radius: 50%; animation: dpop 1.2s infinite; }
+    .dots span:nth-child(2){animation-delay:0.2s}
+    .dots span:nth-child(3){animation-delay:0.4s}
+    @keyframes dpop { 0%,80%,100%{transform:scale(0.7);opacity:0.4} 40%{transform:scale(1.2);opacity:1} }
+
+    /* SUCCESS */
+    .suc { text-align: center; padding: 60px 20px; }
+    .suc-icon { font-size: 4rem; display: block; margin-bottom: 20px; animation: pop 0.6s cubic-bezier(0.175,0.885,0.32,1.275) both; }
+    @keyframes pop { from{transform:scale(0)} to{transform:scale(1)} }
+    .suc h2 { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 12px; }
+    .suc p { color: var(--muted); max-width: 380px; margin: 0 auto 28px; line-height: 1.6; }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 768px) {
+      nav { padding: 16px 20px; }
+      .page { padding: 95px 18px 60px; }
+      .cfg-grid { grid-template-columns: 1fr; }
+      .anon-row { grid-column: 1; }
+      .agrid { grid-template-columns: 1fr 1fr; }
+      .page-title { font-size: 2rem; }
+      .api-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">
+    <div class="logo-dot"></div>SakshaAI
+  </a>
+  <a href="index.html" class="nav-back">← Back to Home</a>
+</nav>
+
+<div class="page">
+
+  <div>
+    <div class="page-tag">Secure • Anonymous • Powered by Gemini AI</div>
+    <h1 class="page-title">Report a Bribe</h1>
+    <p class="page-sub">
+      Record the conversation. Gemini AI extracts the evidence and drafts your formal complaint —
+      completely free, anonymous, in under 60 seconds.
+    </p>
+  </div>
+
+  <!-- STEPS INDICATOR -->
+  <div class="steps-indicator">
+    <div class="step-ind active" id="ind-1">
+      <div class="step-ind-num">1</div>
+      <div class="step-ind-label">Setup</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-ind" id="ind-2">
+      <div class="step-ind-num">2</div>
+      <div class="step-ind-label">Record</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-ind" id="ind-3">
+      <div class="step-ind-num">3</div>
+      <div class="step-ind-label">Analyze</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-ind" id="ind-4">
+      <div class="step-ind-num">4</div>
+      <div class="step-ind-label">File</div>
+    </div>
+  </div>
+
+  <!-- GEMINI API KEY -->
+  <div class="api-config">
+    <div class="api-header">
+      <h4>🔑 Google Gemini API Key — Free</h4>
+      <span class="api-status no" id="apiStatus">Demo Mode</span>
+    </div>
+    <div class="api-row">
+      <input
+        type="password"
+        class="api-inp"
+        id="geminiKey"
+        placeholder="AIzaSy... (paste your free Gemini key here)"
+        oninput="onKeyInput()"
+      />
+      <button class="api-btn" onclick="saveKey()">Connect</button>
+    </div>
+    <p class="api-hint">
+      Free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a>
+      — sign in with Google → Get API Key. No credit card. 15 req/min free forever.
+      Leave blank to use Demo Mode with simulated AI responses.
+    </p>
+  </div>
+
+  <!-- ── STEP 1: SETUP ── -->
+  <div class="card lit" id="step1">
+    <div class="card-title"><div class="cnum">1</div>Case Details</div>
+
+    <div class="cfg-grid">
+      <div class="fgroup">
+        <label>Language of Conversation</label>
+        <select id="langSel">
+          <option value="hi-IN">Hindi</option>
+          <option value="en-IN">English</option>
+          <option value="ta-IN">Tamil</option>
+          <option value="te-IN">Telugu</option>
+          <option value="kn-IN">Kannada</option>
+          <option value="bn-IN">Bengali</option>
+          <option value="mr-IN">Marathi</option>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label>Department (Optional)</label>
+        <select id="deptSel">
+          <option value="">Let Gemini AI Detect Automatically</option>
+          <option value="RTO Office">RTO Office</option>
+          <option value="Municipal Corporation">Municipal Corporation</option>
+          <option value="Traffic Police">Traffic Police</option>
+          <option value="Revenue Department">Revenue Department</option>
+          <option value="Government Hospital">Government Hospital</option>
+          <option value="Income Tax">Income Tax</option>
+          <option value="Passport Office">Passport Office</option>
+          <option value="Police Station">Police Station</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="anon-row" onclick="toggleAnon()">
+        <div class="tswitch" id="anonSw"></div>
+        <div>
+          <div style="font-size:0.9rem;font-weight:500">Anonymous Mode</div>
+          <div style="font-size:0.78rem;margin-top:2px;color:var(--success)" id="anonSub">
+            ✓ Active — Your identity will not appear in the complaint
+          </div>
+        </div>
+      </div>
+
+      <div class="anon-row" style="margin-top:8px;cursor:default;" id="mediatorRow">
+        <div style="width:42px;height:22px;flex-shrink:0"></div>
+        <div style="flex:1;display:flex;gap:12px;align-items:center">
+          <div style="flex:1">
+            <div style="font-size:0.9rem;font-weight:500">Submit via Mediator</div>
+            <div style="font-size:0.78rem;margin-top:2px;color:var(--muted)">Request a trusted NGO or lawyer to file on your behalf.</div>
+          </div>
+          <select id="mediatorSel" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px">
+            <option value="">(No mediator)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:22px">
+      <button class="btn btn-p" onclick="goStep(2)">Continue to Recording →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: RECORD ── -->
+  <div class="card hidden" id="step2">
+    <div class="card-title"><div class="cnum">2</div>Record the Conversation</div>
+
+    <div class="demo-banner hidden" id="demoBanner">
+      ⚡ <strong>Demo Mode</strong> — No API key. Sample data will be used to show the full AI flow.
+      Add your free Gemini key above to use real AI analysis.
+    </div>
+
+    <!-- RECORD UI -->
+    <div class="rec-center">
+      <div class="rec-wrap" id="recWrap">
+        <div class="rec-pulse"></div>
+        <button class="rec-btn" id="recBtn" onclick="toggleRec()">🎙️</button>
+      </div>
+      <div class="timer" id="timer">00:00</div>
+      <div class="waveform" id="waveform">
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+      </div>
+      <div class="rec-status" id="recStatus">
+        Press the button to start recording.<br/>Web Speech API transcribes in real time — free, no API needed.
+      </div>
+    </div>
+
+    <div class="live-badge hidden" id="liveBadge">
+      <div class="live-dot"></div>
+      Live transcription active — speak clearly and naturally
+    </div>
+
+    <textarea class="tbox" id="tbox"
+      placeholder="Transcript appears automatically as you speak, or type/paste manually...">
+    </textarea>
+
+    <div class="tactions">
+      <button class="btn btn-p" id="analyzeBtn" onclick="doAnalyze()" disabled>
+        🧠 Analyze with Gemini AI
+      </button>
+      <button class="btn btn-o" onclick="loadDemo()">📋 Use Demo Transcript</button>
+      <button class="btn btn-o" onclick="document.getElementById('tbox').value='';document.getElementById('analyzeBtn').disabled=true">🗑️ Clear</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: ANALYSIS ── -->
+  <div class="card hidden" id="step3">
+    <div class="card-title"><div class="cnum">3</div>AI Evidence Analysis</div>
+
+    <div class="loader hidden" id="aLoader">
+      <span class="loader-icon">🧠</span>
+      <div style="color:var(--muted);font-size:0.9rem">
+        Gemini AI is analyzing for corruption evidence
+        <div class="dots"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+
+    <div class="hidden" id="aResults">
+      <div class="agrid" id="agrid"></div>
+      <div class="sumbox" id="sumbox"></div>
+      <div class="authbox">
+        <div>
+          <div class="authlabel">Recommended Authority to Report</div>
+          <div class="authname" id="authname">—</div>
+        </div>
+        <div id="evbadge"></div>
+      </div>
+      <div style="margin-top:18px">
+        <button class="btn btn-p" onclick="doComplaint()">📄 Generate Complaint Letter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 4: COMPLAINT ── -->
+  <div class="card hidden" id="step4">
+    <div class="card-title"><div class="cnum">4</div>Formal Complaint Letter</div>
+
+    <div class="loader hidden" id="cLoader">
+      <span class="loader-icon">📝</span>
+      <div style="color:var(--muted);font-size:0.9rem">
+        Drafting your formal complaint letter
+        <div class="dots"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+
+    <div class="hidden" id="cContent">
+      <p style="color:var(--muted);font-size:0.82rem;margin-bottom:14px">
+        Review and edit before filing. Replace <strong style="color:var(--text)">[YOUR NAME]</strong>
+        and <strong style="color:var(--text)">[YOUR ADDRESS]</strong> with your details,
+        or keep as-is for anonymous filing.
+      </p>
+      <textarea class="cbox" id="cbox"></textarea>
+
+      <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+        <button class="btn btn-s" onclick="dlComplaint()">📥 Download (.txt)</button>
+        <button class="btn btn-o" onclick="cpComplaint()">📋 Copy</button>
+        <button class="btn btn-o" onclick="prComplaint()">🖨️ Print</button>
+      </div>
+
+      <div class="guide">
+        <h4>📬 How to Submit This Complaint</h4>
+        <p id="guideText">Loading submission instructions...</p>
+      </div>
+
+      <button class="btn btn-p btn-full" onclick="markFiled()">
+        ✅ Mark as Filed — Complaint Submitted
+      </button>
+    </div>
+  </div>
+
+  <!-- ── SUCCESS ── -->
+  <div class="card hidden" id="successCard">
+    <div class="suc">
+      <span class="suc-icon">🎉</span>
+      <h2>Complaint Filed!</h2>
+      <p>Your report is documented. Every complaint contributes to India's corruption database and creates real pressure for systemic change.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a href="dashboard.html" class="btn btn-p">View City Dashboard →</a>
+        <button class="btn btn-o" onclick="location.reload()">File Another Report</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let geminiKey = '';
+let isAnon = true;
+let recording = false;
+let recog = null;
+let timerInt = null;
+let secs = 0;
+let analysis = null;
+
+// ══════════════════════════════════════════
+//  API KEY
+// ══════════════════════════════════════════
+function onKeyInput() {
+  const v = document.getElementById('geminiKey').value.trim();
+  const st = document.getElementById('apiStatus');
+  st.textContent = v.length > 10 ? 'Ready — click Connect' : 'Demo Mode';
+  st.className = 'api-status no';
+}
+
+// Load available mediators into selector
+document.addEventListener('DOMContentLoaded', () => {
+  fetch('/api/mediators').then(r => r.json()).then(list => {
+    const sel = document.getElementById('mediatorSel');
+    if (!sel) return;
+    list.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = `${m.name} — ${m.contact}`;
+      sel.appendChild(opt);
+    });
+  }).catch(() => {});
+});
+
+async function requestMediator(reportPayload, mediatorId) {
+  try {
+    // Resolve mediator contact from list
+    const res = await fetch('/api/mediators');
+    const list = res.ok ? await res.json() : [];
+    const med = list.find(m => m.id === mediatorId);
+    const body = { report: reportPayload, mediator_id: mediatorId, mediator_contact: med ? med.contact : null, report_id: reportPayload.id };
+    const r = await fetch('/api/mediate', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch (e) { return null; }
+}
+
+function saveKey() {
+  const v = document.getElementById('geminiKey').value.trim();
+  geminiKey = v;
+  const st = document.getElementById('apiStatus');
+  if (v) {
+    st.textContent = '✓ Connected';
+    st.className = 'api-status ok';
+    event.target.textContent = '✓ Saved';
+    setTimeout(() => event.target.textContent = 'Connect', 1500);
+  } else {
+    st.textContent = 'Demo Mode';
+    st.className = 'api-status no';
+  }
+}
+
+// ══════════════════════════════════════════
+//  STEPS
+// ══════════════════════════════════════════
+function goStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`ind-${i}`);
+    el.classList.remove('active','done');
+    if (i < n) el.classList.add('done');
+    if (i === n) el.classList.add('active');
+  }
+  if (n >= 2) {
+    const c = document.getElementById('step2');
+    c.classList.remove('hidden');
+    c.classList.add('lit');
+    if (!geminiKey) document.getElementById('demoBanner').classList.remove('hidden');
+    setTimeout(() => c.scrollIntoView({behavior:'smooth',block:'start'}), 100);
+  }
+}
+
+// ══════════════════════════════════════════
+//  ANON
+// ══════════════════════════════════════════
+function toggleAnon() {
+  isAnon = !isAnon;
+  const sw = document.getElementById('anonSw');
+  const sub = document.getElementById('anonSub');
+  sw.classList.toggle('off', !isAnon);
+  if (isAnon) {
+    sub.style.color = 'var(--success)';
+    sub.textContent = '✓ Active — Your identity will not appear in the complaint';
+  } else {
+    sub.style.color = 'var(--warning)';
+    sub.textContent = '⚠ Off — Your name will be included in the complaint';
+  }
+}
+
+// ══════════════════════════════════════════
+//  RECORDING (Web Speech API — FREE)
+// ══════════════════════════════════════════
+function toggleRec() {
+  if (!recording) startRec(); else stopRec();
+}
+
+function startRec() {
+  const lang = document.getElementById('langSel').value;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (SR) {
+    recog = new SR();
+    recog.lang = lang;
+    recog.continuous = true;
+    recog.interimResults = true;
+
+    let final = '';
+    recog.onresult = e => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) final += t + ' ';
+        else interim += t;
+      }
+      document.getElementById('tbox').value = final + interim;
+      document.getElementById('analyzeBtn').disabled =
+        (final + interim).trim().length < 10;
+    };
+
+    recog.onerror = e => {
+      document.getElementById('recStatus').textContent =
+        `⚠ Speech error: ${e.error}. Type manually or use Demo transcript.`;
+    };
+
+    recog.onend = () => { if (recording) recog.start(); };
+    recog.start();
+    document.getElementById('liveBadge').classList.remove('hidden');
+    document.getElementById('recStatus').textContent =
+      '🔴 Recording + live transcription active. Speak clearly.';
+  } else {
+    document.getElementById('recStatus').textContent =
+      '🔴 Recording... (Live transcription needs Chrome browser)';
+  }
+
+  recording = true;
+  document.getElementById('recBtn').classList.add('go');
+  document.getElementById('recBtn').textContent = '⏹️';
+  document.getElementById('recWrap').classList.add('go');
+  document.getElementById('waveform').classList.add('go');
+  document.getElementById('timer').classList.add('go');
+
+  secs = 0;
+  timerInt = setInterval(() => {
+    secs++;
+    const m = String(Math.floor(secs/60)).padStart(2,'0');
+    const s = String(secs%60).padStart(2,'0');
+    document.getElementById('timer').textContent = `${m}:${s}`;
+  }, 1000);
+}
+
+function stopRec() {
+  recording = false;
+  clearInterval(timerInt);
+  if (recog) { recog.onend = null; recog.stop(); recog = null; }
+
+  document.getElementById('recBtn').classList.remove('go');
+  document.getElementById('recBtn').textContent = '🎙️';
+  document.getElementById('recWrap').classList.remove('go');
+  document.getElementById('waveform').classList.remove('go');
+  document.getElementById('timer').classList.remove('go');
+  document.getElementById('liveBadge').classList.add('hidden');
+
+  const t = document.getElementById('tbox').value.trim();
+  document.getElementById('recStatus').textContent = t.length > 10
+    ? '✓ Transcript ready — click Analyze with Gemini AI'
+    : 'Recording stopped. Add transcript manually or use Demo transcript.';
+  if (t.length > 10) document.getElementById('analyzeBtn').disabled = false;
+}
+
+function loadDemo() {
+  document.getElementById('tbox').value =
+`Officer: Yahan parking nahi kar sakte. License dikhao.
+Me: Sir, yahan toh sign nahi hai parking ka.
+Officer: Sign hai ya nahi, mujhe pata hai. Challan katega tera — teen hazaar rupaye.
+Me: Sir please, main ghalti se aa gaya yahan.
+Officer: Dekh, agar directly settlement karna hai toh do hazaar mujhe de de abhi. Receipt nahi milegi, lekin challan bhi nahi katega.
+Me: Sir aap bribe maang rahe hain?
+Officer: Arey setting keh, bribe nahi. Tu dena chahta hai ya nahi? Do hazaar de aur ja.`;
+  document.getElementById('analyzeBtn').disabled = false;
+  document.getElementById('recStatus').textContent = '✓ Demo transcript loaded. Click Analyze.';
+}
+
+// Enable analyze on typing
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('tbox').addEventListener('input', function() {
+    document.getElementById('analyzeBtn').disabled = this.value.trim().length < 10;
+  });
+});
+
+// ══════════════════════════════════════════
+//  GEMINI API
+// ══════════════════════════════════════════
+async function callGemini(prompt) {
+  if (!geminiKey) {
+    await new Promise(r => setTimeout(r, 1800));
+    return null; // demo mode
+  }
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.1, maxOutputTokens: 1500 }
+    })
+  });
+  if (!res.ok) throw new Error((await res.json())?.error?.message || 'Gemini error');
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+// ══════════════════════════════════════════
+//  STEP 3 — ANALYZE
+// ══════════════════════════════════════════
+async function doAnalyze() {
+  const transcript = document.getElementById('tbox').value.trim();
+  if (!transcript) return;
+
+  // Show step 3
+  const s3 = document.getElementById('step3');
+  s3.classList.remove('hidden');
+  s3.classList.add('lit');
+  document.getElementById('aLoader').classList.remove('hidden');
+  document.getElementById('aResults').classList.add('hidden');
+
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`ind-${i}`);
+    el.classList.remove('active','done');
+    if (i < 3) el.classList.add('done');
+    if (i === 3) el.classList.add('active');
+  }
+  setTimeout(() => s3.scrollIntoView({behavior:'smooth',block:'start'}), 100);
+
+  const dept = document.getElementById('deptSel').value;
+
+  const prompt = `You are an Indian anti-corruption legal expert. Analyze this conversation transcript for bribery or corruption evidence under Indian law.
+
+Transcript:
+"${transcript}"
+${dept ? `\nSuspected Department: ${dept}` : ''}
+
+Respond ONLY with a single valid JSON object. No markdown. No explanation. No code blocks:
+{
+  "bribe_amount": "e.g. Rs.2000 or null",
+  "official_name": "name or Unknown Official",
+  "department": "government department name",
+  "location": "location or Not Specified",
+  "violation": "specific law e.g. Prevention of Corruption Act 1988, Section 7",
+  "authority_to_report": "e.g. Anti-Corruption Bureau or Lokayukta or CVC",
+  "risk_level": "HIGH or MEDIUM or LOW",
+  "evidence_strength": "STRONG or MODERATE or WEAK",
+  "summary": "2-3 sentence factual summary of what happened",
+  "submission_guide": "numbered step-by-step instructions to file with the authority in India"
+}`;
+
+  try {
+    const txt = await callGemini(prompt);
+    if (!txt) {
+      analysis = demoAnalysis(transcript, dept);
+    } else {
+      const clean = txt.replace(/```json|```/g, '').trim();
+      analysis = JSON.parse(clean);
+    }
+  } catch (e) {
+    console.error(e);
+    analysis = demoAnalysis(transcript, dept);
+    document.getElementById('demoBanner').classList.remove('hidden');
+    document.getElementById('demoBanner').innerHTML =
+      '⚠ <strong>API Error</strong> — Check your Gemini key. Showing demo results.';
+  }
+
+  document.getElementById('aLoader').classList.add('hidden');
+  renderAnalysis(analysis);
+}
+
+function demoAnalysis(transcript = '', dept = '') {
+  // Try to extract numeric amount from transcript first
+  function parseAmountFromText(text) {
+    if (!text) return null;
+    // look for explicit rupee symbol or numbers
+    const re1 = /(?:₹|Rs\.?|rs\.?|rupees?)\s?([0-9]+(?:,[0-9]{3})*)/i;
+    const m1 = text.match(re1);
+    if (m1 && m1[1]) return `₹${m1[1].replace(/,/g,'')}`;
+    // look for plain numbers (e.g. "500" or "1500")
+    const re2 = /\b([0-9]{2,6})(?:\b|\s)/;
+    const m2 = text.match(re2);
+    if (m2 && m2[1]) return `₹${m2[1]}`;
+    // common Hindi word amounts in demo transcripts
+    const lower = text.toLowerCase();
+    if (lower.includes('do hazaar') || lower.includes('do hazar') || lower.includes('2 hazaar')) return '₹2,000';
+    if (lower.includes('teen hazaar') || lower.includes('3 hazaar')) return '₹3,000';
+    if (lower.includes('paanch sau') || lower.includes('500') || lower.includes('500')) return '₹500';
+    return null;
+  }
+
+  const amount = parseAmountFromText(transcript) || parseAmountFromText(document.getElementById('tbox')?.value || '') || '₹2,000';
+
+  return {
+    bribe_amount: amount,
+    official_name: 'Unknown Traffic Officer',
+    department: dept || 'Traffic Police',
+    location: 'Not Specified',
+    violation: 'Prevention of Corruption Act 1988, Section 7 — Public servant accepting bribe',
+    authority_to_report: 'Anti-Corruption Bureau (ACB)',
+    risk_level: 'HIGH',
+    evidence_strength: 'STRONG',
+    summary: `A traffic police officer demanded ${amount} as an illegal cash payment to avoid issuing an official penalty. The officer offered to forgo proceedings in exchange for direct cash without a receipt — constituting direct bribery under the Prevention of Corruption Act 1988.`,
+    submission_guide: 'Anonymous-safe submission options:\n\n1) Use an official anonymous tip channel (if available) — many ACB/CVC portals accept anonymous tips. File the tip online and attach this complaint or transcript.\n\n2) Submit via a trusted third party (NGO or lawyer) — ask an organization to file on your behalf so your identity is not recorded.\n\n3) Send a physical letter without a return address (ordinary post) or use a PO Box / trusted intermediary. Avoid registered post if you must not reveal identity.\n\n4) Upload evidence using an anonymous email/account (ProtonMail/Tor) and strip audio metadata before upload. Share only the transcript if that feels safer.\n\n5) Use public Wi‑Fi or Tor when submitting online; avoid home/work networks tied to you.\n\n6) Request a complaint/reference number and follow up through the third party or NGO to preserve anonymity.\n\nSafety note: True anonymity cannot be guaranteed. Using intermediaries, removing personal identifiers from files, and avoiding personally traceable networks reduces risk but does not eliminate it. For high-risk cases, seek legal advice or support from a local whistleblower NGO.'
+  };
+}
+
+function renderAnalysis(d) {
+  document.getElementById('aResults').classList.remove('hidden');
+  const rc = d.risk_level==='HIGH'?'bd':d.risk_level==='MEDIUM'?'bw':'bs';
+  const ec = d.evidence_strength==='STRONG'?'bs':d.evidence_strength==='MODERATE'?'bw':'bd';
+
+  document.getElementById('agrid').innerHTML = `
+    <div class="aitem hi"><div class="alabel">💰 Bribe Amount</div><div class="aval">${d.bribe_amount||'Not Specified'}</div></div>
+    <div class="aitem"><div class="alabel">👤 Official</div><div class="aval">${d.official_name}</div></div>
+    <div class="aitem"><div class="alabel">🏛️ Department</div><div class="aval">${d.department}</div></div>
+    <div class="aitem"><div class="alabel">📍 Location</div><div class="aval">${d.location}</div></div>
+    <div class="aitem"><div class="alabel">⚠️ Risk Level</div><div class="aval"><span class="badge ${rc}">${d.risk_level}</span></div></div>
+    <div class="aitem"><div class="alabel">⚖️ Law Violated</div><div class="aval" style="font-size:0.78rem;font-weight:400">${d.violation}</div></div>
+  `;
+  document.getElementById('sumbox').textContent = d.summary;
+  document.getElementById('authname').textContent = d.authority_to_report;
+  document.getElementById('evbadge').innerHTML = `<span class="badge ${ec}">Evidence: ${d.evidence_strength}</span>`;
+}
+
+// ══════════════════════════════════════════
+//  STEP 4 — COMPLAINT
+// ══════════════════════════════════════════
+async function doComplaint() {
+  const s4 = document.getElementById('step4');
+  s4.classList.remove('hidden');
+  s4.classList.add('lit');
+  document.getElementById('cLoader').classList.remove('hidden');
+  document.getElementById('cContent').classList.add('hidden');
+
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`ind-${i}`);
+    el.classList.remove('active','done');
+    if (i < 4) el.classList.add('done');
+    if (i === 4) el.classList.add('active');
+  }
+  setTimeout(() => s4.scrollIntoView({behavior:'smooth',block:'start'}), 100);
+
+  const today = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  const nameF = isAnon ? '[ANONYMOUS COMPLAINANT]' : '[YOUR FULL NAME]';
+  const addrF = isAnon ? '[WITHHELD FOR SAFETY]' : '[YOUR COMPLETE ADDRESS]';
+
+  const prompt = `Write a formal anti-corruption complaint letter for submission to Indian authorities. Plain text only, no markdown.
+
+Details:
+- Department: ${analysis.department}
+- Official: ${analysis.official_name}
+- Bribe Amount: ${analysis.bribe_amount}
+- Location: ${analysis.location}
+- Law Violated: ${analysis.violation}
+- Submit To: ${analysis.authority_to_report}
+- Date: ${today}
+- Name: ${nameF}
+- Address: ${addrF}
+
+Write a complete professional complaint letter. Include: salutation, factual account, law sections cited, relief requested, declaration. Under 350 words. Formal legal language.`;
+
+  try {
+    const txt = await callGemini(prompt);
+    document.getElementById('cbox').value = txt
+      ? txt.trim()
+      : demoComplaint(today, nameF, addrF);
+  } catch(e) {
+    document.getElementById('cbox').value = demoComplaint(today, nameF, addrF);
+  }
+
+  document.getElementById('guideText').innerHTML =
+    (analysis.submission_guide || '').replace(/\n/g,'<br>');
+
+  document.getElementById('cLoader').classList.add('hidden');
+  document.getElementById('cContent').classList.remove('hidden');
+}
+
+function demoComplaint(date, name, addr) {
+  return `To,
+The Superintendent of Police
+${analysis?.authority_to_report || 'Anti-Corruption Bureau'}
+
+Subject: Formal Complaint — Bribery by Government Official (${analysis?.department || 'Traffic Police'})
+
+Date: ${date}
+
+Respected Sir/Madam,
+
+I, ${name}, residing at ${addr}, hereby file this formal complaint regarding an act of bribery and corruption.
+
+FACTS:
+
+On ${date}, an official from the ${analysis?.department || 'Traffic Police'} department demanded ${analysis?.bribe_amount || '₹2,000'} as illegal cash payment in exchange for not performing their official duty. The official explicitly offered to forgo official proceedings in exchange for direct cash without a receipt.
+
+LAWS VIOLATED:
+1. ${analysis?.violation || 'Prevention of Corruption Act 1988, Section 7'}
+2. Prevention of Corruption Act 1988, Section 13(1)(b) — Criminal Misconduct
+
+RELIEF SOUGHT:
+1. Register this complaint and initiate immediate inquiry
+2. Take legal action against the official under the PC Act 1988
+3. Suspend the official pending inquiry
+4. Inform me of action taken within 30 days
+
+I declare that the above information is true and correct to the best of my knowledge.
+
+Yours faithfully,
+${name}
+${addr}
+Date: ${date}
+
+Enclosures:
+1. This complaint letter
+2. Conversation transcript`;
+}
+
+// ══════════════════════════════════════════
+//  DOWNLOAD / COPY / PRINT
+// ══════════════════════════════════════════
+function dlComplaint() {
+  const text = document.getElementById('cbox').value;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));
+  a.download = `SakshaAI_Complaint_${new Date().toISOString().slice(0,10)}.txt`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function cpComplaint() {
+  navigator.clipboard.writeText(document.getElementById('cbox').value).then(() => {
+    const b = event.currentTarget;
+    const o = b.innerHTML;
+    b.innerHTML = '✓ Copied!';
+    setTimeout(() => b.innerHTML = o, 2000);
+  });
+}
+
+function prComplaint() {
+  const win = window.open('','_blank');
+  win.document.write(`<html><head><title>SakshaAI Complaint</title>
+    <style>body{font-family:'Times New Roman',serif;font-size:14px;padding:60px;line-height:1.8;max-width:700px;margin:0 auto}pre{white-space:pre-wrap;font-family:inherit}</style>
+    </head><body><pre>${document.getElementById('cbox').value}</pre></body></html>`);
+  win.document.close();
+  setTimeout(() => win.print(), 400);
+}
+
+function markFiled() {
+  // Send report to backend (best-effort). Do not block UI on failure.
+  try {
+    const payload = {
+      date: new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}),
+      department: analysis?.department || document.getElementById('deptSel').value || null,
+      official_name: analysis?.official_name || null,
+      bribe_amount: analysis?.bribe_amount || null,
+      location: analysis?.location || null,
+      violation: analysis?.violation || null,
+      authority_to_report: analysis?.authority_to_report || null,
+      risk_level: analysis?.risk_level || null,
+      evidence_strength: analysis?.evidence_strength || null,
+      transcript: document.getElementById('tbox').value.trim(),
+      complaint: document.getElementById('cbox') ? document.getElementById('cbox').value : null,
+      anonymous: !!isAnon
+    };
+    fetch('/api/report', {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
+    }).catch(()=>{});
+  } catch(e) { /* ignore */ }
+
+  // If mediator selected, create a mediation request and show bundle link
+  const mediatorId = document.getElementById('mediatorSel') ? document.getElementById('mediatorSel').value : '';
+  if (mediatorId) {
+    const reportPayload = Object.assign({}, payload, { id: Date.now() });
+    requestMediator(reportPayload, mediatorId).then(resp => {
+      if (resp && resp.bundle) {
+        const sc = document.getElementById('successCard');
+        let info = document.getElementById('mediateInfo');
+        if (!info) {
+          info = document.createElement('div');
+          info.id = 'mediateInfo';
+          info.style.marginTop = '12px';
+          info.style.padding = '12px';
+          info.style.background = 'rgba(255,77,28,0.04)';
+          info.style.border = '1px solid rgba(255,77,28,0.08)';
+          sc.querySelector('.suc').appendChild(info);
+        }
+        info.innerHTML = `Mediator request sent. Bundle available: <a href="${resp.bundle}" target="_blank">Download anonymized bundle</a><br/>Mediator contact: ${resp.mediator_contact || '—'}`;
+      }
+    });
+  }
+
+  document.getElementById('step4').classList.add('hidden');
+  const sc = document.getElementById('successCard');
+  sc.classList.remove('hidden');
+  setTimeout(() => sc.scrollIntoView({behavior:'smooth',block:'start'}), 100);
+  for (let i=1;i<=4;i++) {
+    const el = document.getElementById(`ind-${i}`);
+    el.classList.remove('active'); el.classList.add('done');
+  }
+}
+</script>
+</body>
+</html>

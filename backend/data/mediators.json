@@ -1,0 +1,21 @@
+[{
+  "id": "ng01",
+  "name": "Citizens Watch (NGO)",
+  "contact": "ngo@citizens.example"
+},
+{
+  "id": "law01",
+  "name": "Public Interest Law Center",
+  "contact": "law@pil.example"
+}][
+  {
+    "id": "ng01",
+    "name": "Citizens Watch (NGO)",
+    "contact": "ngo@citizens.example"
+  },
+  {
+    "id": "law01",
+    "name": "Public Interest Law Center",
+    "contact": "law@pil.example"
+  }
+]
