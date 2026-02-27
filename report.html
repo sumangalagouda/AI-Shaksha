@@ -331,9 +331,8 @@
         class="api-inp"
         id="geminiKey"
         placeholder="AIzaSy... (paste your free Gemini key here)"
-        oninput="onKeyInput()"
       />
-      <button class="api-btn" onclick="saveKey()">Connect</button>
+      <button class="api-btn">Connect</button>
     </div>
     <p class="api-hint">
       Free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a>
@@ -579,15 +578,19 @@ async function requestMediator(reportPayload, mediatorId) {
   } catch (e) { return null; }
 }
 
-function saveKey() {
+function saveKey(ev) {
   const v = document.getElementById('geminiKey').value.trim();
   geminiKey = v;
   const st = document.getElementById('apiStatus');
+  const btn = ev && ev.currentTarget ? ev.currentTarget : document.querySelector('.api-config .api-btn');
   if (v) {
     st.textContent = '✓ Connected';
     st.className = 'api-status ok';
-    event.target.textContent = '✓ Saved';
-    setTimeout(() => event.target.textContent = 'Connect', 1500);
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = '✓ Saved';
+      setTimeout(() => { btn.textContent = orig || 'Connect'; }, 1500);
+    }
   } else {
     st.textContent = 'Demo Mode';
     st.className = 'api-status no';
@@ -1030,7 +1033,7 @@ function markFiled() {
           info.style.border = '1px solid rgba(255,77,28,0.08)';
           sc.querySelector('.suc').appendChild(info);
         }
-        info.innerHTML = `Mediator request sent. Bundle available: <a href="${resp.bundle}" target="_blank">Download anonymized bundle</a><br/>Mediator contact: ${resp.mediator_contact || '—'}`;
+        info.innerHTML = 'Mediator request sent. Bundle available: <a href="' + (resp.bundle || '#') + '" target="_blank">Download anonymized bundle</a><br/>Mediator contact: ' + (resp.mediator_contact || '—');
       }
     });
   }
@@ -1044,6 +1047,17 @@ function markFiled() {
     el.classList.remove('active'); el.classList.add('done');
   }
 }
+
+  // Attach handlers and expose functions for inline compatibility
+  document.addEventListener('DOMContentLoaded', () => {
+    const keyIn = document.getElementById('geminiKey');
+    const btn = document.querySelector('.api-config .api-btn');
+    if (keyIn) keyIn.addEventListener('input', onKeyInput);
+    if (btn) btn.addEventListener('click', (e) => saveKey(e));
+    // keep backward compatibility for any inline handlers
+    window.onKeyInput = onKeyInput;
+    window.saveKey = saveKey;
+  });
 </script>
 </body>
 </html>
